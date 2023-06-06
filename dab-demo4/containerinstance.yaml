@@ -1,0 +1,47 @@
+name: ci-dab-demo-api
+apiVersion: "2021-10-01"
+location: westeurope
+properties:
+  containers:
+    - name: data-api-builder
+      properties:
+        image: mcr.microsoft.com/azure-databases/data-api-builder:latest
+        ports: 
+          - protocol: TCP
+            port: 5000 
+        resources:
+          requests:
+            memoryInGB: 1
+            cpu: 1
+          limits:
+            memoryInGB: 1
+            cpu: 1
+        volumeMounts:
+          - name: dab-config
+            mountPath: /dab-config
+        environmentVariables:
+          - name: DATABASE_CONNECTION_STRING
+            secureValue: "<your-connection-string>"
+          - name: ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS
+            value: true
+        command:
+          - dotnet 
+          - Azure.DataApiBuilder.Service.dll
+          - --ConfigFileName
+          - /dab-config/dab-config.json
+
+  ipAddress:
+    ports:
+      - protocol: TCP
+        port: 5000
+    type: Public        
+    dnsNameLabel: dab-demo-8912-api
+
+  osType: Linux
+
+  volumes:
+    - name: dab-config
+      azureFile: 
+        shareName: dab-config
+        storageAccountName: "<storage-account-name>" 
+        storageAccountKey: "<storage-account-key>"
